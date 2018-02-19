@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fd3f6758fd806e44b35a9deeeca7ffa, type: 3}
+  m_Name: Scratched Hauberk
+  m_EditorClassIdentifier: 
+  name: Scratched Hauberk
+  icon: {fileID: 0}
+  isDefaultItem: 1
+  price: 0
+  equipSlot: 1
+  damageType: 3
+  requiredLevel: 0
+  physicalArmorModifier: 0.02
+  magicalArmorModifier: 0.01
+  dodgeModifier: 0.04
+  healthModifier: 75
+  minDamageModifier: 0
+  maxDamageModifier: 0
+  critChanceModifier: 0
+  critDamageModifier: 0
+  accuracy: 0

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c2f0ec91d258e44aee16f156fcaa68, type: 3}
+  m_Name: Kick
+  m_EditorClassIdentifier: 
+  name: Kick
+  classRequired: 0
+  isActivated: 1
+  resourceCost: 20
+  accuracy: 68
+  skillTargets: 00000000
+  playerPositions: 0100000002000000
+  enemyPositions: 01000000
+  allyPositions: 
+  isDamagingSkill: 0
+  damagePercent: 0
+  damageValueType: 0
+  isBleedingSkill: 0
+  bleedChance: 0
+  bleedDamage: 0
+  bleedDuration: 0
+  isBlightingSkill: 0
+  blightChance: 0
+  blightDamage: 0
+  blightDuration: 0
+  isBurningSkill: 0
+  burnChance: 0
+  burnDamage: 0
+  burnDuration: 0
+  isStunningSkill: 1
+  stunChance: 0.1
+  stunDuration: 2
+  isDamageBuffSkill: 0
+  damageBuffPercent: 0
+  damageBuffDuration: 0
+  isCritRegenBuffSkill: 0
+  critRegenPercent: 0
+  critRegenDuration: 0
+  isDisplacementSkill: 1
+  forwardDisplacement: 1
+  backwardDisplacement: 0
