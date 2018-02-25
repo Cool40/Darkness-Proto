@@ -3,15 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyStats : CharacterStats {
-
-    public override void Die()
-    {
-        base.Die();
-
-        // Add ragdoll effect/death anim
-
-        Destroy(gameObject);
-    }
     void Start()
     {
         accuracy.AddModifier(GetComponent<Enemy>().monsterSpecies.accuracy);

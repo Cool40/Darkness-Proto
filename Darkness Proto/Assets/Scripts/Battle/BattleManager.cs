@@ -30,11 +30,17 @@ public class BattleManager : MonoBehaviour {
     public GameObject battleUI;
     public GameObject battleLog;
     public Enemy[] enemies;
+    public GameObject[] enemyGraphics;
+    public GameObject warriorGraphics;
+    public GameObject rogueGraphics;
+    public GameObject mageGraphics;
+    public GameObject paladinGraphics;
     public bool[] chosenEnemies;
     public bool[] chosenAllies;
     public List<int> chosenEnemyPositions;
     public GameObject[] enemyToggles;
     Skill currentUsedSkill;
+    int turnCounter;
     public float[] speeds;
     int movedObject;
     public List<PlayerSkills> playerSkills;
@@ -47,6 +53,7 @@ public class BattleManager : MonoBehaviour {
             playerSkills.Capacity++;
             playerSkills.Add(player[i].GetComponent<PlayerSkills>());
         }
+        enemyGraphics = new GameObject[4];
     }
     private void Update()
     {
@@ -59,6 +66,24 @@ public class BattleManager : MonoBehaviour {
     public void StartBattle(Camera battleCam, Camera roomCam, Enemy[] enemies)
     {
         this.enemies = enemies;
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            enemyGraphics[i] = enemies[i].transform.GetChild(0).gameObject;
+            enemyGraphics[i].SetActive(true);
+        }
+        foreach (Enemy enemy in enemies)
+        {
+            enemy.GetComponent<EnemyStats>().healthBar.transform.Find("Text").GetComponent<Text>().text = enemy.GetComponent<EnemyStats>().currentHealth + "/" + enemy.GetComponent<EnemyStats>().maxHealth.GetValue();
+        }
+        warriorGraphics = battleCam.transform.parent.Find("Warrior GFX").gameObject;
+        warriorGraphics.SetActive(true);
+        rogueGraphics = battleCam.transform.parent.Find("Rogue GFX").gameObject;
+        rogueGraphics.SetActive(true);
+        mageGraphics = battleCam.transform.parent.Find("Mage GFX").gameObject;
+        mageGraphics.SetActive(true);
+        paladinGraphics = battleCam.transform.parent.Find("Paladin GFX").gameObject;
+        paladinGraphics.SetActive(true);
+        player[0].transform.parent.Find("GFX").gameObject.SetActive(false);
         chosenEnemies = new bool[enemies.Length];
         speeds = new float[player.Length + enemies.Length];
         battleUI.SetActive(true);
@@ -69,11 +94,11 @@ public class BattleManager : MonoBehaviour {
         //player.transform.position = new Vector3(battleCam.transform.position.x - 3.5f, player.transform.position.y, battleCam.transform.position.z + 10f);
         //player.transform.rotation = new Quaternion(0, 0, 0, 0);
         movedObject = CheckForSpeed();
-        int i = 0;
+        int foreachIndex = 0;
         foreach (Skill skill in player[movedObject].GetComponent<PlayerSkills>().activatedSkills)
         {
-            skillsUI[i].GetComponentInChildren<Text>().text = skill.name;
-            i++;
+            skillsUI[foreachIndex].GetComponentInChildren<Text>().text = skill.name;
+            foreachIndex++;
         }
         InitializeTurn();
     }
@@ -85,25 +110,27 @@ public class BattleManager : MonoBehaviour {
         //Check if stunned
         for (int i = 1; i <= player.Length+enemies.Length; i++)
         {
-            if (speeds.Length == 0)
+            if (speeds[Array.IndexOf(speeds, speeds.Max<float>())] == 0)
             {
                 movedObject = CheckForSpeed();
             }
             else
             {
                 movedObject = Array.IndexOf(speeds, speeds.Max<float>());
-                speeds[Array.IndexOf(speeds, speeds.Max<float>())] = 0;
                 Debug.Log(movedObject);
             }
             if (movedObject >= player.Length)
             {
                 //move enemy at index movedOject - player.Lenght + 1
-                enemies[movedObject - player.Length].MoveEnemy(player);
+                battleLog.GetComponent<Text>().text += "<b>Turn of " + enemies[movedObject - player.Length].monsterSpecies.monsterName + " <" + enemies[movedObject - player.Length].GetComponent<EnemyStats>().currentPosition + "> starts. </b>\n\n";
+                enemies[movedObject - player.Length].MoveEnemy(player, battleLog);
                 speeds = speeds.ToArray();
                 speeds[Array.IndexOf(speeds, speeds.Max<float>())] = 0;
             }
             else
             {
+                battleLog.GetComponent<Text>().text += "<b>Turn of " + player[movedObject].name + " <" + player[movedObject].GetComponent<PlayerStats>().currentPosition + "> starts. </b>\n\n";
+                speeds[Array.IndexOf(speeds, speeds.Max<float>())] = 0;
                 break;
             }
         }
@@ -175,21 +202,40 @@ public class BattleManager : MonoBehaviour {
                 currentUsedSkill.UseSkillOnSelf(player[movedObject].GetComponent<PlayerStats>());
             }
             InitializeTurn();
-            int i = 0;
+            int foreachIndexII = 0;
             if (movedObject < player.Length)
             {
                 foreach (Skill skill in player[movedObject].GetComponent<PlayerSkills>().activatedSkills)
                 {
-                    skillsUI[i].GetComponentInChildren<Text>().text = skill.name;
-                    i++;
+                    skillsUI[foreachIndexII].GetComponentInChildren<Text>().text = skill.name;
+                    foreachIndexII++;
                 }
             }
-            chosenEnemyPositions.Clear();
+            int a = 0;
+            foreach(bool chosenEnemy in chosenEnemies)
+            {
+                chosenEnemies.ToArray()[a] = false;
+                a++;
+            }
+            foreach (int chosenEnemy in chosenEnemyPositions.ToList())
+            {
+                chosenEnemyPositions.Remove(chosenEnemy);
+            }
+            foreach(GameObject toggle in enemyToggles)
+            {
+                toggle.GetComponent<Toggle>().isOn = false;
+            }
         }
     }
 
     int CheckForSpeed()
     {
+        turnCounter++;
+        if(battleLog.GetComponent<Text>().text.Length > 2000)
+        {
+            battleLog.GetComponent<Text>().text = null;
+        }
+        battleLog.GetComponent<Text>().text += "<color=#fff082><Turn " + turnCounter + " has started.></color>\n\n\n";
         int i = 0;
             foreach (GameObject player in player)
             {
@@ -198,7 +244,10 @@ public class BattleManager : MonoBehaviour {
             }
             foreach (Enemy enemy in enemies)
             {
-                speeds[i] = enemy.GetComponent<EnemyStats>().speed.GetValue();
+                if(enemy != null)
+                {
+                    speeds[i] = enemy.GetComponent<EnemyStats>().speed.GetValue();
+                }
                 i++;
             }
         return Array.IndexOf(speeds, speeds.Max<float>());
@@ -218,7 +267,7 @@ public class BattleManager : MonoBehaviour {
                 else
                 {
                     statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
-                    player.GetComponent<PlayerStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
+                    player.GetComponent<PlayerStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString(), player.name);
                 }
                 player.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
             }
@@ -239,7 +288,7 @@ public class BattleManager : MonoBehaviour {
                 else
                 {
                     statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
-                    enemy.GetComponent<EnemyStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
+                    enemy.GetComponent<EnemyStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString(), enemy.monsterSpecies.monsterName);
                 }
                 enemy.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
             }

@@ -64,10 +64,6 @@ public class PlayerStats : CharacterStats {
             }
         }
     }
-    public override void Die()
-    {
-        base.Die();
-    }
 }
 
 public enum PlayerClass { Warrior, Rogue, Mage, Paladin }

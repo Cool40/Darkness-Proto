@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class CharacterStats : MonoBehaviour {
 
@@ -18,12 +19,17 @@ public class CharacterStats : MonoBehaviour {
     public int currentResource;
     public int currentPosition;
 
+    public Slider healthBar;
+
     void Awake()
     {
         currentHealth = (int)maxHealth.GetValue();
         currentResource = (int)maxResource.GetValue();
+
+        healthBar.value = 1;
+        healthBar.transform.Find("Text").GetComponent<Text>().text = currentHealth + "/" + maxHealth.GetValue();
     }
-    public void TakeDamage(int damage, DamageType damageType, string damageSource)
+    public void TakeDamage(int damage, DamageType damageType, string damageSource, string name)
     {
             if(damageType == DamageType.Physical)
             {
@@ -35,15 +41,22 @@ public class CharacterStats : MonoBehaviour {
             }
             damage = Mathf.Clamp(damage, 0, int.MaxValue);
             currentHealth -= damage;
-            Debug.Log(transform.name + " takes " + damage + " damage from " + damageSource + ".");
+            GameObject.Find("Content").GetComponent<Text>().text += name + " takes " + damage + " damage from " + damageSource + ".\n\n";
             if (currentHealth <= 0)
             {
-                Die();
+                Die(name);
             }
+        healthBar.value = CalculateHealthPercent();
+        healthBar.transform.Find("Text").GetComponent<Text>().text = currentHealth + "/" + maxHealth.GetValue();
     }
-    public virtual void Die()
+    float CalculateHealthPercent()
     {
-        // Die in some way
-        Debug.Log(transform.name + " died.");
+        return currentHealth / maxHealth.GetValue();
+    }
+    public virtual void Die(string name)
+    {
+        currentHealth = 0;
+        Destroy(gameObject);
+        Destroy(healthBar.gameObject);
     }
 }
