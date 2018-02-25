@@ -16,13 +16,21 @@ MonoBehaviour:
   isActivated: 0
   resourceCost: 0
   accuracy: 78
+  skillCooldown: 0
   skillTargets: 00000000
   playerPositions: 010000000200000003000000
   enemyPositions: 0100000002000000
+  enemyPositionsCount: 1
+  minSpaceBetweenEnemies: 0
+  maxSpaceBetweenEnemies: 0
   allyPositions: 
+  allyPositionsCount: 0
+  minSpaceBetweenAllies: 0
+  maxSpaceBetweenAllies: 0
   isDamagingSkill: 1
+  alwaysCrits: 0
   damagePercent: 100
-  damageValueType: 0
+  damageValueType: 1
   isBleedingSkill: 1
   bleedChance: 0.08
   bleedDamage: 0.35
@@ -44,6 +52,20 @@ MonoBehaviour:
   isCritRegenBuffSkill: 0
   critRegenPercent: 0
   critRegenDuration: 0
+  isManaRegenBuffSkill: 0
+  manaRegenPercent: 0
+  manaRegenDuration: 0
+  isOneTimeDamageReductionSkill: 0
+  oneTimeDamageReductionPercent: 0
+  isAccuracyDebuffSkill: 0
+  accuracyDebuffPercent: 0
+  accuracyDebuffDuration: 0
+  isStunResDebuffSkill: 0
+  stunResDebuffPercent: 0
+  stunResDebuffDuration: 0
   isDisplacementSkill: 0
   forwardDisplacement: 0
   backwardDisplacement: 0
+  isSelfDisplacementSkill: 0
+  forwardSelfDisplacement: 0
+  backwardSelfDisplacement: 0

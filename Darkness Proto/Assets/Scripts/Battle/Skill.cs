@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "New Skill", menuName = "Battle/Skill")]
 public class Skill : ScriptableObject {
@@ -12,6 +13,7 @@ public class Skill : ScriptableObject {
     [Space(10)]
     public int resourceCost = 0;
     public int accuracy = 0;
+    public int skillCooldown = 0;
 
     [Header("Target Properties")]
 
@@ -20,12 +22,25 @@ public class Skill : ScriptableObject {
     public int[] playerPositions;
     [Range(1, 4)]
     public int[] enemyPositions;
+    [Range(0, 4)]
+    public int enemyPositionsCount;
+    [Range(0, 2)]
+    public int minSpaceBetweenEnemies;
+    [Range(0, 2)]
+    public int maxSpaceBetweenEnemies;
     [Range(1, 4)]
     public int[] allyPositions;
+    [Range(0, 4)]
+    public int allyPositionsCount;
+    [Range(0, 2)]
+    public int minSpaceBetweenAllies;
+    [Range(0, 2)]
+    public int maxSpaceBetweenAllies;
 
     [Header("Damage Properties")]
 
     public bool isDamagingSkill = false;
+    public bool alwaysCrits = false;
     public float damagePercent = 0f;
     public DamageValueType damageValueType;
 
@@ -62,11 +77,34 @@ public class Skill : ScriptableObject {
     public float damageBuffPercent = 0f;
     public int damageBuffDuration = 0;
 
-    [Header("Critical Regen Properties")]
+    [Header("Critical Regen Buff Properties")]
 
     public bool isCritRegenBuffSkill = false;
     public float critRegenPercent = 0f;
     public int critRegenDuration;
+
+    [Header("Mana Regen Buff Properties")]
+
+    public bool isManaRegenBuffSkill = false;
+    public float manaRegenPercent = 0f;
+    public int manaRegenDuration;
+
+    [Header("Damage Reduction Buff Properties (Until Attacked)")]
+
+    public bool isOneTimeDamageReductionSkill = false;
+    public float oneTimeDamageReductionPercent = 0f;
+
+    [Header("Accuracy Debuff Properties")]
+
+    public bool isAccuracyDebuffSkill = false;
+    public float accuracyDebuffPercent = 0f;
+    public int accuracyDebuffDuration = 0;
+
+    [Header("Stun Res Debuff Properties (Flat)")]
+
+    public bool isStunResDebuffSkill = false;
+    public float stunResDebuffPercent = 0f;
+    public int stunResDebuffDuration = 0;
 
     [Header("Displacement Properties")]
 
@@ -76,12 +114,20 @@ public class Skill : ScriptableObject {
     [Range(0, 3)]
     public int backwardDisplacement = 0;
 
-    public void UseSkillOnEnemy(Enemy enemy, PlayerStats playerStats)
+    [Header("Self-Displacement Properties")]
+
+    public bool isSelfDisplacementSkill = false;
+    [Range(0, 3)]
+    public int forwardSelfDisplacement = 0;
+    [Range(0, 3)]
+    public int backwardSelfDisplacement = 0;
+
+    public void UseSkillOnEnemy(Enemy enemy, PlayerStats playerStats, GameObject battleLog)
     {
-        Debug.Log("Using " + name);
+        battleLog.GetComponent<Text>().text += playerStats.name + " uses " + name + " on " + enemy.monsterSpecies.monsterName + "\n\n";
         float accuracyAverage = (accuracy + playerStats.accuracy.GetValue()) / 200;
         bool hasHit = Random.value < (accuracyAverage - enemy.GetComponent<EnemyStats>().dodge.GetValue());
-        if (hasHit && playerStats.currentResource >= resourceCost)
+        if (hasHit)
         {
             playerStats.currentResource -= resourceCost;
             if (isDamagingSkill)
@@ -132,21 +178,93 @@ public class Skill : ScriptableObject {
                 }
             }
         }
-        else if (!hasHit && playerStats.currentResource >= resourceCost)
+        else
         {
             Debug.Log(enemy.monsterSpecies.monsterName + " dodges the attack!");
         }
-        else if (playerStats.currentResource < resourceCost)
+    }
+    public void UseSkillOnEnemyMonster(Enemy enemy, PlayerStats playerStats)
+    {
+        Debug.Log(enemy.monsterSpecies.monsterName + " uses " + name);
+        float accuracyAverage = (accuracy + enemy.GetComponent<EnemyStats>().accuracy.GetValue()) / 200;
+        bool hasHit = Random.value < (accuracyAverage - playerStats.dodge.GetValue());
+        if (hasHit)
         {
-            Debug.Log("You lack mana to use that skill!");
-            // loop until player chooses cheaper skill
+            enemy.GetComponent<EnemyStats>().currentResource -= resourceCost;
+            if (isDamagingSkill)
+            {
+                int damage = 0;
+                damage = CalculateDamage(enemy.GetComponent<EnemyStats>());
+                if (enemy.GetComponent<EnemyStats>().critChance.GetValue() >= Random.value)
+                {
+                    Debug.Log("Crit!");
+                    damage = (int)(damage * enemy.GetComponent<EnemyStats>().critDamage.GetValue());
+                }
+                Debug.Log(enemy.monsterSpecies.monsterName + " deals " + damage + " damage.");
+                playerStats.GetComponent<CharacterStats>().TakeDamage(damage, enemy.GetComponent<EnemyStats>().damageType, name);
+            }
+            if (isBleedingSkill)
+            {
+                if (Random.value < bleedChance)
+                {
+                    int newBleedDamage = (int)(bleedDamage * (damagePercent / 100 * (Random.Range(enemy.GetComponent<EnemyStats>().minDamage.GetValue(), enemy.GetComponent<EnemyStats>().maxDamage.GetValue()))));
+                    Debug.Log(enemy.monsterSpecies.monsterName + " causes " + playerStats.name + " to bleed for " + newBleedDamage + " for the next " + bleedDuration + " turns.");
+                    playerStats.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Bleed, newBleedDamage, bleedDuration);
+                }
+            }
+            if (isBlightingSkill)
+            {
+                if (Random.value < blightChance)
+                {
+                    int newBlightDamage = (int)(blightDamage * (damagePercent / 100 * (Random.Range(enemy.GetComponent<EnemyStats>().minDamage.GetValue(), enemy.GetComponent<EnemyStats>().maxDamage.GetValue()))));
+                    Debug.Log(enemy.monsterSpecies.monsterName + " causes " + playerStats.name + " to blight for " + newBlightDamage + " for the next " + blightDuration + " turns.");
+                    playerStats.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Blight, newBlightDamage, blightDuration);
+                }
+            }
+            if (isBurningSkill)
+            {
+                if (Random.value < burnChance)
+                {
+                    int newBurnDamage = (int)(burnDamage * (damagePercent / 100 * (Random.Range(enemy.GetComponent<EnemyStats>().minDamage.GetValue(), enemy.GetComponent<EnemyStats>().maxDamage.GetValue()))));
+                    Debug.Log(enemy.monsterSpecies.monsterName + " causes " + playerStats.name + " to bleed for " + newBurnDamage + " for the next " + burnDuration + " turns.");
+                    playerStats.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Burn, newBurnDamage, burnDuration);
+                }
+            }
+            if (isStunningSkill)
+            {
+                if (Random.value < stunChance)
+                {
+                    Debug.Log(enemy.monsterSpecies.monsterName + " causes " + playerStats.name + " to be stunned for the next " + stunDuration + " turns.");
+                    playerStats.GetComponent<StatusEffectHandler>().AddStun(stunDuration);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log(playerStats.name + " dodges the attack!");
         }
     }
-    public void UseSkillOnAlly(PlayerStats playerStats)
+    public void UseSkillOnAlly(PlayerStats allyStats, PlayerStats playerStats)
     {
-
+        if (isDamageBuffSkill)
+        {
+            Debug.Log(allyStats.name + " gains " + damageBuffPercent + "% damage for the next " + damageBuffDuration + " turns.");
+            allyStats.GetComponent<BuffHandler>().AddBuff(damageBuffDuration);
+            allyStats.minDamage.AddPercentageModifier(damageBuffPercent / 100);
+            allyStats.maxDamage.AddPercentageModifier(damageBuffPercent / 100);
+        }
     }
     public void UseSkillOnSelf(PlayerStats playerStats)
+    {
+        if (isDamageBuffSkill)
+        {
+            Debug.Log("You gain " + +damageBuffPercent + "% damage for the next " + damageBuffDuration + " turns.");
+            playerStats.GetComponent<BuffHandler>().AddBuff(damageBuffDuration);
+            playerStats.minDamage.AddPercentageModifier(damageBuffPercent / 100);
+            playerStats.maxDamage.AddPercentageModifier(damageBuffPercent / 100);
+        }
+    }
+    public void UseSkillOnSelfMonster(Enemy enemy)
     {
 
     }
@@ -163,6 +281,21 @@ public class Skill : ScriptableObject {
         else
         {
             return (int)(damagePercent / 100 * playerStats.maxDamage.GetValue());
+        }
+    }
+    public int CalculateDamage(EnemyStats enemyStats)
+    {
+        if (damageValueType == DamageValueType.Minimal)
+        {
+            return (int)(damagePercent / 100 * enemyStats.minDamage.GetValue());
+        }
+        else if (damageValueType == DamageValueType.Random)
+        {
+            return (int)(damagePercent / 100 * (Random.Range(enemyStats.minDamage.GetValue(), enemyStats.maxDamage.GetValue())));
+        }
+        else
+        {
+            return (int)(damagePercent / 100 * enemyStats.maxDamage.GetValue());
         }
     }
 

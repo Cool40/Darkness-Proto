@@ -27,6 +27,6 @@ MonoBehaviour:
   blightRes: 0.3
   fireRes: 0.7
   stunRes: 0.25
-  skill1: {fileID: 0}
-  skill2: {fileID: 0}
+  skill1: {fileID: 11400000, guid: b87c09bd629322142a400b5475f99db9, type: 2}
+  skill2: {fileID: 11400000, guid: ab1b1913c2edd1248bd97298b074f164, type: 2}
   skill3: {fileID: 0}

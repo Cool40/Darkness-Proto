@@ -17,7 +17,8 @@ MonoBehaviour:
   price: 0
   equipSlot: 0
   damageType: 0
-  requiredLevel: 0
+  classRequired: 0
+  requiredLevel: 1
   physicalArmorModifier: 0
   magicalArmorModifier: 0
   dodgeModifier: 0
@@ -26,4 +27,12 @@ MonoBehaviour:
   maxDamageModifier: 8
   critChanceModifier: 0.03
   critDamageModifier: 1.5
+  physicalArmorPercentageModifier: 0
+  magicalArmorPercentageModifier: 0
+  dodgePercentageModifier: 0
+  healthPercentageModifier: 0
+  minDamagePercentageModifier: 0
+  maxDamagePercentageModifier: 0
+  critChancePercentageModifier: 0
+  critDamagePercentageModifier: 0
   accuracy: 78

@@ -5,6 +5,7 @@ using UnityEngine.AI;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Linq;
+using System;
 
 public class BattleManager : MonoBehaviour {
 
@@ -24,210 +25,267 @@ public class BattleManager : MonoBehaviour {
 
     #endregion
 
-    public GameObject player;
+    public GameObject[] player;
     public Image[] skillsUI;
     public GameObject battleUI;
-    public Enemy enemy;
-    PlayerSkills playerSkills;
-    bool isPlayersTurn = false;
-    int usedSkillIndex = -1;
+    public GameObject battleLog;
+    public Enemy[] enemies;
+    public bool[] chosenEnemies;
+    public bool[] chosenAllies;
+    public List<int> chosenEnemyPositions;
+    public GameObject[] enemyToggles;
+    Skill currentUsedSkill;
+    public float[] speeds;
+    int movedObject;
+    public List<PlayerSkills> playerSkills;
+    int usedSkillIndex;
 
     private void Start()
     {
-        player = PlayerManager.instance.player;
-        playerSkills = player.GetComponent<PlayerSkills>();
-        skillsUI = battleUI.GetComponentsInChildren<Image>();
+        for (int i = 0; i < player.Count(); i++)
+        {
+            playerSkills.Capacity++;
+            playerSkills.Add(player[i].GetComponent<PlayerSkills>());
+        }
     }
     private void Update()
     {
-        if (usedSkillIndex != -1 && enemy != null)
-        {
-            InitializeTurn();
-        }
+        //if (usedSkillIndex != -1 && enemies.Length != 0)
+        //{
+        //    InitializeTurn();
+        //}
     }
 
-    public void StartBattle(Camera battleCam, Camera roomCam, Enemy enemy)
+    public void StartBattle(Camera battleCam, Camera roomCam, Enemy[] enemies)
     {
-        this.enemy = enemy;
+        this.enemies = enemies;
+        chosenEnemies = new bool[enemies.Length];
+        speeds = new float[player.Length + enemies.Length];
         battleUI.SetActive(true);
         roomCam.enabled = false;
         battleCam.enabled = true;
-        player.GetComponent<PlayerController>().isInBattle = true;
-        player.GetComponent<NavMeshAgent>().isStopped = true;
-        foreach(Skill skill in playerSkills.activatedSkills)
+        //player.GetComponent<PlayerController>().isInBattle = true;
+        //player.GetComponent<NavMeshAgent>().isStopped = true;
+        //player.transform.position = new Vector3(battleCam.transform.position.x - 3.5f, player.transform.position.y, battleCam.transform.position.z + 10f);
+        //player.transform.rotation = new Quaternion(0, 0, 0, 0);
+        movedObject = CheckForSpeed();
+        int i = 0;
+        foreach (Skill skill in player[movedObject].GetComponent<PlayerSkills>().activatedSkills)
         {
-            skillsUI[playerSkills.activatedSkills.IndexOf(skill)].GetComponentInChildren<Text>().text = skill.name;
+            skillsUI[i].GetComponentInChildren<Text>().text = skill.name;
+            i++;
         }
-        StartCoroutine(Sleep(1f));
-        player.transform.position = new Vector3(battleCam.transform.position.x - 3.5f, player.transform.position.y, battleCam.transform.position.z + 10f);
-        player.transform.rotation = new Quaternion(0, 0, 0, 0);
+        InitializeTurn();
     }
     public void InitializeTurn()
     {
-        if (EventSystem.current.currentSelectedGameObject == null)
+        //Move fastest enemy
+        //Add mana to it
+        //Handle status effects
+        //Check if stunned
+        for (int i = 1; i <= player.Length+enemies.Length; i++)
         {
-            return;
-        }
-        CheckForSpeed();
-        //Move the player and enemy
-        if (isPlayersTurn)
-        {
-            HandlePlayerStatusEffects();
-            if (!IsStunned(player))
+            if (speeds.Length == 0)
             {
-                GetUsedSkill();
-                if(playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Enemy))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnEnemy(enemy, player.GetComponent<PlayerStats>());
-                }
-                if (playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Self))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnSelf(player.GetComponent<PlayerStats>());
-                }
-                if (playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Ally))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnAlly(player.GetComponent<PlayerStats>());
-                }
-            }
-            usedSkillIndex = -1;
-            //Add resource
-            player.GetComponent<PlayerStats>().currentResource += 10;
-            Mathf.Clamp(player.GetComponent<PlayerStats>().currentResource, 0, player.GetComponent<PlayerStats>().maxResource.GetValue());
-            
-            HandleEnemyStatusEffects();
-            if (!IsStunned(enemy.gameObject))
-            {
-                // move enemy
-            }
-            //Add resource
-            enemy.GetComponent<EnemyStats>().currentResource += 10;
-            Mathf.Clamp(enemy.GetComponent<EnemyStats>().currentResource, 0, enemy.GetComponent<EnemyStats>().maxResource.GetValue());
-        }
-        else
-        {
-            HandleEnemyStatusEffects();
-            if (!IsStunned(enemy.gameObject))
-            {
-                // move enemy first
-            }
-            //Add resource
-            enemy.GetComponent<EnemyStats>().currentResource += 10;
-            Mathf.Clamp(enemy.GetComponent<EnemyStats>().currentResource, 0, player.GetComponent<EnemyStats>().maxResource.GetValue());
-
-            HandlePlayerStatusEffects();
-            if (!IsStunned(player))
-            {
-                GetUsedSkill();
-                if (playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Enemy))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnEnemy(enemy, player.GetComponent<PlayerStats>());
-                }
-                if (playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Self))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnSelf(player.GetComponent<PlayerStats>());
-                }
-                if (playerSkills.activatedSkills[usedSkillIndex].skillTargets.Contains(SkillTarget.Ally))
-                {
-                    playerSkills.activatedSkills[usedSkillIndex].UseSkillOnAlly(player.GetComponent<PlayerStats>());
-                }
-            }
-            usedSkillIndex = -1;
-            //Add resource
-            player.GetComponent<PlayerStats>().currentResource += 10;
-            Mathf.Clamp(player.GetComponent<PlayerStats>().currentResource, 0, player.GetComponent<PlayerStats>().maxResource.GetValue());
-        }
-        //Check for status effects
-    }
-    public void GetUsedSkill()
-    {
-        usedSkillIndex = System.Convert.ToInt32(EventSystem.current.currentSelectedGameObject.name.Substring(6, 1));
-    }
-
-    void CheckForSpeed()
-    {
-        if (player.GetComponent<PlayerStats>().speed.GetValue() > enemy.GetComponent<EnemyStats>().speed.GetValue())
-        {
-            isPlayersTurn = true;
-        }
-        else if (player.GetComponent<PlayerStats>().speed.GetValue() == enemy.GetComponent<EnemyStats>().speed.GetValue())
-        {
-            float randomizeTurn = Random.value;
-            if (Random.value >= 0.5f)
-            {
-                isPlayersTurn = true;
+                movedObject = CheckForSpeed();
             }
             else
             {
-                isPlayersTurn = false;
+                movedObject = Array.IndexOf(speeds, speeds.Max<float>());
+                speeds[Array.IndexOf(speeds, speeds.Max<float>())] = 0;
+                Debug.Log(movedObject);
+            }
+            if (movedObject >= player.Length)
+            {
+                //move enemy at index movedOject - player.Lenght + 1
+                enemies[movedObject - player.Length].MoveEnemy(player);
+                speeds = speeds.ToArray();
+                speeds[Array.IndexOf(speeds, speeds.Max<float>())] = 0;
+            }
+            else
+            {
+                break;
             }
         }
-        else if (player.GetComponent<PlayerStats>().speed.GetValue() > enemy.GetComponent<EnemyStats>().speed.GetValue())
+        for (int i = 1; i <= enemyToggles.Length; i++)
         {
-            isPlayersTurn = false;
+            enemyToggles[i-1].SetActive(false);
         }
+    }
+    public void GetUsedSkill()
+    {
+        for (int i = 1; i <= enemyToggles.Length; i++)
+        {
+            enemyToggles[i - 1].SetActive(false);
+        }
+        battleUI.transform.Find("Selected Skill").GetComponentInChildren<Text>().text = "Current Selection: None";
+        usedSkillIndex = Convert.ToInt32(EventSystem.current.currentSelectedGameObject.name.Substring(6, 1));
+        Mathf.Clamp(usedSkillIndex, 0, 4);
+        currentUsedSkill = playerSkills[movedObject].activatedSkills[usedSkillIndex];
+        if (movedObject <= player.Length)
+        {
+            battleUI.transform.Find("Selected Skill").GetComponentInChildren<Text>().text = "Current Selection: " + currentUsedSkill.name;
+        }
+        if(currentUsedSkill.enemyPositions.Contains(1))
+        {
+            enemyToggles[0].SetActive(true);
+        }
+        if (currentUsedSkill.enemyPositions.Contains(2))
+        {
+            enemyToggles[1].SetActive(true);
+        }
+        if (currentUsedSkill.enemyPositions.Contains(3))
+        {
+            enemyToggles[2].SetActive(true);
+        }
+        if (currentUsedSkill.enemyPositions.Contains(4))
+        {
+            enemyToggles[3].SetActive(true);
+        }
+    }
+    public void MovePlayer()
+    {
+        if (currentUsedSkill.resourceCost <= player[movedObject].GetComponent<PlayerStats>().currentResource)
+        {
+            int foreachIndex = 0;
+            foreach (bool chosenEnemy in chosenEnemies)
+            {
+                foreachIndex++;
+                if (chosenEnemy)
+                {
+                    chosenEnemyPositions.Add(foreachIndex);
+                }
+            }
+            foreach (int chosenEnemyPosition in chosenEnemyPositions)
+            {
+            }
+            if (currentUsedSkill.skillTargets.Contains(SkillTarget.Enemy))
+            {
+                foreach (int chosenEnemyPosition in chosenEnemyPositions)
+                {
+                    currentUsedSkill.UseSkillOnEnemy(enemies[chosenEnemyPosition - 1], player[movedObject].GetComponent<PlayerStats>(), battleLog);
+                }
+            }
+            if (currentUsedSkill.skillTargets.Contains(SkillTarget.Ally))
+            {
+                currentUsedSkill.UseSkillOnAlly(player[0].GetComponent<PlayerStats>(), player[movedObject].GetComponent<PlayerStats>());
+            }
+            if (currentUsedSkill.skillTargets.Contains(SkillTarget.Self))
+            {
+                currentUsedSkill.UseSkillOnSelf(player[movedObject].GetComponent<PlayerStats>());
+            }
+            InitializeTurn();
+            int i = 0;
+            if (movedObject < player.Length)
+            {
+                foreach (Skill skill in player[movedObject].GetComponent<PlayerSkills>().activatedSkills)
+                {
+                    skillsUI[i].GetComponentInChildren<Text>().text = skill.name;
+                    i++;
+                }
+            }
+            chosenEnemyPositions.Clear();
+        }
+    }
+
+    int CheckForSpeed()
+    {
+        int i = 0;
+            foreach (GameObject player in player)
+            {
+                speeds[i] = player.GetComponent<PlayerStats>().speed.GetValue();
+                i++;
+            }
+            foreach (Enemy enemy in enemies)
+            {
+                speeds[i] = enemy.GetComponent<EnemyStats>().speed.GetValue();
+                i++;
+            }
+        return Array.IndexOf(speeds, speeds.Max<float>());
     }
 
     void HandlePlayerStatusEffects()
     {
-        foreach (StatusEffect statusEffect in player.GetComponent<StatusEffectHandler>().statusEffects.ToList())
+        foreach (GameObject player in player)
         {
-            statusEffect.remainingDuration--;
-            if (statusEffect.statusEffectType == StatusEffectType.Stun)
+            foreach (StatusEffect statusEffect in player.GetComponent<StatusEffectHandler>().statusEffects.ToList())
             {
-                statusEffect.name = "Stun, (" + statusEffect.remainingDuration + ")";
+                statusEffect.remainingDuration--;
+                if (statusEffect.statusEffectType == StatusEffectType.Stun)
+                {
+                    statusEffect.name = "Stun, (" + statusEffect.remainingDuration + ")";
+                }
+                else
+                {
+                    statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
+                    player.GetComponent<PlayerStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
+                }
+                player.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
             }
-            else
-            {
-                statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
-                enemy.GetComponent<EnemyStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
-            }
-            enemy.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
         }
+
     }
     void HandleEnemyStatusEffects()
     {
-        foreach (StatusEffect statusEffect in enemy.GetComponent<StatusEffectHandler>().statusEffects.ToList())
+        foreach (Enemy enemy in enemies)
         {
-            statusEffect.remainingDuration--;
-            if (statusEffect.statusEffectType == StatusEffectType.Stun)
+            foreach (StatusEffect statusEffect in enemy.GetComponent<StatusEffectHandler>().statusEffects.ToList())
             {
-                statusEffect.name = "Stun, (" + statusEffect.remainingDuration + ")";
+                statusEffect.remainingDuration--;
+                if (statusEffect.statusEffectType == StatusEffectType.Stun)
+                {
+                    statusEffect.name = "Stun, (" + statusEffect.remainingDuration + ")";
+                }
+                else
+                {
+                    statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
+                    enemy.GetComponent<EnemyStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
+                }
+                enemy.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
             }
-            else
+
+        }
+    }
+    public void AddEnemyPosition(GameObject toggle)
+    {
+        chosenEnemies[(Convert.ToInt32(toggle.name.Substring(6, 1)))] = !chosenEnemies[(Convert.ToInt32(toggle.name.Substring(6, 1)))];
+        int countOfTrue = 0;
+        foreach(GameObject enemyToggle in enemyToggles)
+        {
+            if (chosenEnemies[(Convert.ToInt32(enemyToggle.name.Substring(6, 1)))])
             {
-                statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + statusEffect.damage + " (" + statusEffect.remainingDuration + ")";
-                enemy.GetComponent<EnemyStats>().TakeDamage(statusEffect.damage, DamageType.True, statusEffect.statusEffectType.ToString());
+                countOfTrue++;
             }
-            enemy.GetComponent<StatusEffectHandler>().CheckForRemoval(statusEffect);
+        }
+        foreach (GameObject enemyToggle in enemyToggles)
+        {
+            if (enemyToggle != toggle && currentUsedSkill.enemyPositionsCount == countOfTrue && !chosenEnemies[Array.IndexOf(enemyToggles, enemyToggle)])
+            {
+                enemyToggle.SetActive(false);
+            }
+        }
+        if(!chosenEnemies.Contains(true))
+        {
+            if (currentUsedSkill.enemyPositions.Contains(1))
+            {
+                enemyToggles[0].SetActive(true);
+            }
+            if (currentUsedSkill.enemyPositions.Contains(2))
+            {
+                enemyToggles[1].SetActive(true);
+            }
+            if (currentUsedSkill.enemyPositions.Contains(3))
+            {
+                enemyToggles[2].SetActive(true);
+            }
+            if (currentUsedSkill.enemyPositions.Contains(4))
+            {
+                enemyToggles[3].SetActive(true);
+            }
         }
     }
     bool IsStunned(GameObject target)
     {
-        if (target.name == "Player")
-        {
-            foreach (StatusEffect statusEffect in player.GetComponent<StatusEffectHandler>().statusEffects.ToList())
-            {
-                if(statusEffect.statusEffectType == StatusEffectType.Stun)
-                {
-                    return true;
-                }
-            }
-        }
-        else if (target.name == "Enemy")
-        {
-            foreach (StatusEffect statusEffect in enemy.GetComponent<StatusEffectHandler>().statusEffects.ToList())
-            {
-                if (statusEffect.statusEffectType == StatusEffectType.Stun)
-                {
-                    return true;
-                }
-            }
-        }
         return false;
-    }
-
-    IEnumerator Sleep(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
     }
 }

@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Name: Scratched Hauberk
   m_EditorClassIdentifier: 
   name: Scratched Hauberk
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c55afbc483d0a2941b1cec5b7e713ec4, type: 3}
   isDefaultItem: 1
   price: 0
   equipSlot: 1
   damageType: 3
-  requiredLevel: 0
+  classRequired: 0
+  requiredLevel: 1
   physicalArmorModifier: 0.02
   magicalArmorModifier: 0.01
   dodgeModifier: 0.04
@@ -26,4 +27,12 @@ MonoBehaviour:
   maxDamageModifier: 0
   critChanceModifier: 0
   critDamageModifier: 0
+  physicalArmorPercentageModifier: 0
+  magicalArmorPercentageModifier: 0
+  dodgePercentageModifier: 0
+  healthPercentageModifier: 0
+  minDamagePercentageModifier: 0
+  maxDamagePercentageModifier: 0
+  critChancePercentageModifier: 0
+  critDamagePercentageModifier: 0
   accuracy: 0

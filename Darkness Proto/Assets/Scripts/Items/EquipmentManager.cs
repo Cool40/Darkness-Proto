@@ -4,19 +4,9 @@ using UnityEngine;
 
 public class EquipmentManager : MonoBehaviour {
 
-    #region Singleton
-
-    public static EquipmentManager instance;
-
-    private void Awake()
-    {
-        instance = this;
-    }
-
-    #endregion
-
     public Equipment[] defaultItems;
     Equipment[] currentEquipment;
+    PlayerLevel playerLevel;
 
     public delegate void OnEquipmentChanged(Equipment newItem, Equipment oldItem);
     public OnEquipmentChanged onEquipmentChanged;
@@ -28,18 +18,26 @@ public class EquipmentManager : MonoBehaviour {
         inventory = Inventory.instance;
         int numSlots = System.Enum.GetNames(typeof(EquipmentSlot)).Length;
         currentEquipment = new Equipment[numSlots];
-
+        playerLevel = GetComponent<PlayerLevel>();
+        onEquipmentChanged += GetComponent<PlayerStats>().OnEquipmentChanged;
         EquipDefaultItems();
     }
     public void Equip(Equipment newItem)
     {
-        int slotIndex = (int)newItem.equipSlot;
-        Equipment oldItem = Unequip(slotIndex);
-        if(onEquipmentChanged != null)
+        if(newItem.requiredLevel <= playerLevel.currentLevel)
         {
-            onEquipmentChanged.Invoke(newItem, oldItem);
+            int slotIndex = (int)newItem.equipSlot;
+            Equipment oldItem = Unequip(slotIndex);
+            if (onEquipmentChanged != null)
+            {
+                onEquipmentChanged.Invoke(newItem, oldItem);
+            }
+            currentEquipment[slotIndex] = newItem;
         }
-        currentEquipment[slotIndex] = newItem;
+        else
+        {
+            Debug.Log("Your level is too low to wear this item.");
+        }
     }
     public Equipment Unequip (int slotIndex)
     {

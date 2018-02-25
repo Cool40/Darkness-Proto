@@ -16,6 +16,7 @@ public class CharacterStats : MonoBehaviour {
     public DamageType damageType;
     public int currentHealth;
     public int currentResource;
+    public int currentPosition;
 
     void Awake()
     {

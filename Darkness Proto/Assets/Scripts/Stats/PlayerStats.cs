@@ -7,10 +7,9 @@ public class PlayerStats : CharacterStats {
     public PlayerClass playerClass;
 
 	void Start () {
-        EquipmentManager.instance.onEquipmentChanged += OnEquipmentChanged;
 	}
 
-    void OnEquipmentChanged(Equipment newItem, Equipment oldItem)
+    public void OnEquipmentChanged(Equipment newItem, Equipment oldItem)
     {
         if (newItem != null)
         {
@@ -23,6 +22,15 @@ public class PlayerStats : CharacterStats {
             critDamage.AddModifier(newItem.critDamageModifier);
             minDamage.AddModifier(newItem.minDamageModifier);
             maxDamage.AddModifier(newItem.maxDamageModifier);
+            physicalArmor.AddPercentageModifier(newItem.physicalArmorPercentageModifier);
+            magicalArmor.AddPercentageModifier(newItem.magicalArmorPercentageModifier);
+            dodge.AddPercentageModifier(newItem.dodgePercentageModifier);
+            maxHealth.AddPercentageModifier(newItem.healthPercentageModifier);
+            accuracy.AddPercentageModifier(newItem.accuracy);
+            critChance.AddPercentageModifier(newItem.critChancePercentageModifier);
+            critDamage.AddPercentageModifier(newItem.critDamagePercentageModifier);
+            minDamage.AddPercentageModifier(newItem.minDamagePercentageModifier);
+            maxDamage.AddPercentageModifier(newItem.maxDamagePercentageModifier);
             currentHealth += newItem.healthModifier;
             if(newItem.equipSlot == EquipmentSlot.Weapon)
             {
@@ -40,6 +48,15 @@ public class PlayerStats : CharacterStats {
             critDamage.RemoveModifier(oldItem.critDamageModifier);
             minDamage.RemoveModifier(oldItem.minDamageModifier);
             maxDamage.RemoveModifier(oldItem.minDamageModifier);
+            physicalArmor.RemovePercentageModifier(oldItem.physicalArmorPercentageModifier);
+            magicalArmor.RemovePercentageModifier(oldItem.magicalArmorPercentageModifier);
+            dodge.RemovePercentageModifier(oldItem.dodgePercentageModifier);
+            maxHealth.RemovePercentageModifier(oldItem.healthPercentageModifier);
+            accuracy.RemovePercentageModifier(newItem.accuracy);
+            critChance.RemovePercentageModifier(oldItem.critChancePercentageModifier);
+            critDamage.RemovePercentageModifier(oldItem.critDamagePercentageModifier);
+            minDamage.RemovePercentageModifier(oldItem.minDamagePercentageModifier);
+            maxDamage.RemovePercentageModifier(oldItem.minDamagePercentageModifier);
             currentHealth -= oldItem.healthModifier;
             if (newItem.equipSlot == EquipmentSlot.Weapon)
             {
@@ -50,7 +67,6 @@ public class PlayerStats : CharacterStats {
     public override void Die()
     {
         base.Die();
-        PlayerManager.instance.KillPlayer();
     }
 }
 

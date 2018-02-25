@@ -4,20 +4,25 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour {
 
-    public BattleManager battleManager;
-    private Camera battleCam;
-    private Camera roomCam;
     public MonsterType monsterSpecies;
 
-    void Start()
+    public void MoveEnemy(GameObject[] player)
     {
-        battleCam = transform.parent.GetComponentInChildren<Camera>();
-        roomCam = transform.parent.parent.GetComponentInChildren<Camera>();
-        battleManager = BattleManager.instance;
-    } 
-
-    private void OnTriggerEnter(Collider collider)
-    {
-        battleManager.StartBattle(battleCam, roomCam, this);
+        switch(monsterSpecies.monsterName)
+        {
+            case "Skeleton Swordsman":
+                if(GetComponent<EnemyStats>().currentPosition != 4)
+                {
+                    int chosenPosition = Random.Range(0, 2);
+                    monsterSpecies.skill1.UseSkillOnEnemyMonster(this, player[chosenPosition].GetComponent<PlayerStats>());
+                }
+                else
+                {
+                    int chosenPosition = Random.Range(0, 1);
+                    monsterSpecies.skill2.UseSkillOnEnemyMonster(this, player[chosenPosition].GetComponent<PlayerStats>());
+                    monsterSpecies.skill2.UseSkillOnSelfMonster(this);
+                }
+                break;
+        }
     }
 }
