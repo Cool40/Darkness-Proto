@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyStats : CharacterStats {
     void Start()
     {
+        healthBar.transform.Find("Name").GetComponent<Text>().text = GetComponent<Enemy>().monsterSpecies.monsterName;
         accuracy.AddModifier(GetComponent<Enemy>().monsterSpecies.accuracy);
         minDamage.AddModifier(GetComponent<Enemy>().monsterSpecies.minDamage);
         maxDamage.AddModifier(GetComponent<Enemy>().monsterSpecies.maxDamage);

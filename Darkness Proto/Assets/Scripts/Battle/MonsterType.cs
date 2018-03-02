@@ -22,6 +22,9 @@ public class MonsterType : ScriptableObject {
     public float blightRes;
     public float fireRes;
     public float stunRes;
+    public int resourceRegen;
+    public int killReward;
+    public float goldPerLevelMultiplier;
 
     public Skill skill1;
     public Skill skill2;

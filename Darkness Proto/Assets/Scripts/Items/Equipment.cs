@@ -38,6 +38,21 @@ public class Equipment : Item {
 
     public override void Use()
     {
+        switch(classRequired)
+        {
+            case ClassRequired.Warrior:
+                equipmentManager = GameObject.Find("Warrior").GetComponent<EquipmentManager>();
+                break;
+            case ClassRequired.Rogue:
+                equipmentManager = GameObject.Find("Rogue").GetComponent<EquipmentManager>();
+                break;
+            case ClassRequired.Mage:
+                equipmentManager = GameObject.Find("Mage").GetComponent<EquipmentManager>();
+                break;
+            case ClassRequired.Paladin:
+                equipmentManager = GameObject.Find("Paladin").GetComponent<EquipmentManager>();
+                break;
+        }
         base.Use();
         equipmentManager.Equip(this);
         RemoveFromInventory();

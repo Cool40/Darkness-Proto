@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Battle : MonoBehaviour
 {
@@ -18,6 +19,6 @@ public class Battle : MonoBehaviour
 
     private void OnTriggerEnter(Collider collider)
     {
-        battleManager.StartBattle(battleCam, roomCam, GetComponentsInChildren<Enemy>());
+        battleManager.StartBattle(battleCam, roomCam, GetComponentsInChildren<Enemy>().ToList());
     }
 }

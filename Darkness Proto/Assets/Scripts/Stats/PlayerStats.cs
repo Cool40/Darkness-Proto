@@ -1,13 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerStats : CharacterStats {
 
     public PlayerClass playerClass;
-
-	void Start () {
-	}
+    public float battlePoints;
+    private void Start()
+    {
+        healthBar.transform.Find("Name").GetComponent<Text>().text = name;
+    }
 
     public void OnEquipmentChanged(Equipment newItem, Equipment oldItem)
     {
@@ -26,7 +29,6 @@ public class PlayerStats : CharacterStats {
             magicalArmor.AddPercentageModifier(newItem.magicalArmorPercentageModifier);
             dodge.AddPercentageModifier(newItem.dodgePercentageModifier);
             maxHealth.AddPercentageModifier(newItem.healthPercentageModifier);
-            accuracy.AddPercentageModifier(newItem.accuracy);
             critChance.AddPercentageModifier(newItem.critChancePercentageModifier);
             critDamage.AddPercentageModifier(newItem.critDamagePercentageModifier);
             minDamage.AddPercentageModifier(newItem.minDamagePercentageModifier);
@@ -52,7 +54,6 @@ public class PlayerStats : CharacterStats {
             magicalArmor.RemovePercentageModifier(oldItem.magicalArmorPercentageModifier);
             dodge.RemovePercentageModifier(oldItem.dodgePercentageModifier);
             maxHealth.RemovePercentageModifier(oldItem.healthPercentageModifier);
-            accuracy.RemovePercentageModifier(newItem.accuracy);
             critChance.RemovePercentageModifier(oldItem.critChancePercentageModifier);
             critDamage.RemovePercentageModifier(oldItem.critDamagePercentageModifier);
             minDamage.RemovePercentageModifier(oldItem.minDamagePercentageModifier);

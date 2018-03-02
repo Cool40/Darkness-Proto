@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c2f0ec91d258e44aee16f156fcaa68, type: 3}
+  m_Name: Rejuvenation
+  m_EditorClassIdentifier: 
+  name: Rejuvenation
+  classRequired: 3
+  isActivated: 1
+  resourceCost: 12
+  accuracy: 100
+  skillCooldown: 0
+  skillTargets: 02000000
+  playerPositions: 01000000020000000300000004000000
+  enemyPositions: 
+  enemyPositionsCount: 0
+  minSpaceBetweenEnemies: 0
+  maxSpaceBetweenEnemies: 0
+  allyPositions: 01000000020000000300000004000000
+  allyPositionsCount: 1
+  minSpaceBetweenAllies: 0
+  maxSpaceBetweenAllies: 0
+  isDamagingSkill: 0
+  alwaysCrits: 0
+  damagePercent: 0
+  damageValueType: 0
+  isBleedingSkill: 0
+  bleedChance: 0
+  bleedDamage: 0
+  bleedDuration: 0
+  isBlightingSkill: 0
+  blightChance: 0
+  blightDamage: 0
+  blightDuration: 0
+  isBurningSkill: 0
+  burnChance: 0
+  burnDamage: 0
+  burnDuration: 0
+  isStunningSkill: 0
+  stunChance: 0
+  stunDuration: 0
+  isHealSkill: 1
+  minHealPercentage: 0.06
+  maxHealPercentage: 0.08
+  isDamageBuffSkill: 0
+  damageBuffPercent: 0
+  damageBuffDuration: 0
+  isCritRegenBuffSkill: 0
+  critRegenPercent: 0
+  critRegenDuration: 0
+  isManaRegenBuffSkill: 0
+  manaRegenPercent: 0
+  manaRegenDuration: 0
+  isOneTimeDamageReductionSkill: 0
+  oneTimeDamageReductionPercent: 0
+  isAccuracyDebuffSkill: 0
+  accuracyDebuffPercent: 0
+  accuracyDebuffDuration: 0
+  isStunResDebuffSkill: 0
+  stunResDebuffPercent: 0
+  stunResDebuffDuration: 0
+  isDisplacementSkill: 0
+  forwardDisplacement: 0
+  backwardDisplacement: 0
+  isSelfDisplacementSkill: 0
+  forwardSelfDisplacement: 0
+  backwardSelfDisplacement: 0

@@ -15,7 +15,7 @@ MonoBehaviour:
   classRequired: 0
   isActivated: 1
   resourceCost: 20
-  accuracy: 68
+  accuracy: 73
   skillCooldown: 0
   skillTargets: 00000000
   playerPositions: 0100000002000000
@@ -44,8 +44,11 @@ MonoBehaviour:
   burnDamage: 0
   burnDuration: 0
   isStunningSkill: 1
-  stunChance: 0.1
+  stunChance: 0.9
   stunDuration: 2
+  isHealSkill: 0
+  minHealPercentage: 0
+  maxHealPercentage: 0
   isDamageBuffSkill: 0
   damageBuffPercent: 0
   damageBuffDuration: 0
@@ -64,8 +67,8 @@ MonoBehaviour:
   stunResDebuffPercent: 0
   stunResDebuffDuration: 0
   isDisplacementSkill: 1
-  forwardDisplacement: 1
-  backwardDisplacement: 0
+  forwardDisplacement: 0
+  backwardDisplacement: 1
   isSelfDisplacementSkill: 0
   forwardSelfDisplacement: 0
   backwardSelfDisplacement: 0

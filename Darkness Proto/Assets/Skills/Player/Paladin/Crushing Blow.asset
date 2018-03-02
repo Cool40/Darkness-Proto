@@ -15,7 +15,7 @@ MonoBehaviour:
   classRequired: 3
   isActivated: 1
   resourceCost: 30
-  accuracy: 70
+  accuracy: 75
   skillCooldown: 0
   skillTargets: 00000000
   playerPositions: 0100000002000000
@@ -46,6 +46,9 @@ MonoBehaviour:
   isStunningSkill: 1
   stunChance: 0.3
   stunDuration: 2
+  isHealSkill: 0
+  minHealPercentage: 0
+  maxHealPercentage: 0
   isDamageBuffSkill: 0
   damageBuffPercent: 0
   damageBuffDuration: 0

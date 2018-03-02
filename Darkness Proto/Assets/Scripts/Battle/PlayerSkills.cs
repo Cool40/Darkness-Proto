@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerSkills : MonoBehaviour {
 
@@ -11,7 +12,7 @@ public class PlayerSkills : MonoBehaviour {
     {
         if(activatedSkills != null)
         {
-            foreach (Skill skill in activatedSkills)
+            foreach (Skill skill in activatedSkills.ToList())
             {
                 if (!skill.isActivated)
                 {
@@ -22,7 +23,7 @@ public class PlayerSkills : MonoBehaviour {
         }
         if(disactivatedSkills != null)
         {
-            foreach (Skill skill in disactivatedSkills)
+            foreach (Skill skill in disactivatedSkills.ToList())
             {
                 if (skill.isActivated)
                 {

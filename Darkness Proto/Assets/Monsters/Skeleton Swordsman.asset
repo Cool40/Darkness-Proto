@@ -15,10 +15,10 @@ MonoBehaviour:
   accuracy: 78
   critChance: 0.08
   critDamage: 1.7
-  minDamage: 14
-  maxDamage: 22
+  minDamage: 28
+  maxDamage: 44
   damageType: 0
-  maxHealth: 250
+  maxHealth: 25
   physicalArmor: 0.2
   magicalArmor: 0.14
   dodge: 0.07
@@ -27,6 +27,9 @@ MonoBehaviour:
   blightRes: 0.3
   fireRes: 0.7
   stunRes: 0.25
+  resourceRegen: 10
+  killReward: 20
+  goldPerLevelMultiplier: 1.08
   skill1: {fileID: 11400000, guid: b87c09bd629322142a400b5475f99db9, type: 2}
   skill2: {fileID: 11400000, guid: ab1b1913c2edd1248bd97298b074f164, type: 2}
   skill3: {fileID: 0}

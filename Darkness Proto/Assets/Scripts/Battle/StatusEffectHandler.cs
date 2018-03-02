@@ -25,22 +25,40 @@ public class StatusEffectHandler : MonoBehaviour {
 
     public void AddStatusEffect(StatusEffectType statusEffectType, int damage, int duration)
     {
-        StatusEffect statusEffect = ScriptableObject.CreateInstance<StatusEffect>();
-        statusEffect.name = statusEffectType.ToString() + ", " + damage + " (" + duration + ")";
-        statusEffect.statusEffectType = statusEffectType;
-        statusEffect.damage = damage;
-        statusEffect.duration = duration;
-        statusEffect.remainingDuration = duration;
-        statusEffects.Add(statusEffect);
+        foreach (StatusEffect statusEffect in statusEffects)
+        {
+            if (statusEffect.statusEffectType == statusEffectType && statusEffect.damage == damage)
+            {
+                statusEffect.remainingDuration += duration;
+                statusEffect.name = statusEffect.statusEffectType.ToString() + ", " + damage + " (" + statusEffect.remainingDuration + ")";
+                return;
+            }
+        }
+        StatusEffect newStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
+        newStatusEffect.name = statusEffectType.ToString() + ", " + damage + " (" + duration + ")";
+        newStatusEffect.statusEffectType = statusEffectType;
+        newStatusEffect.damage = damage;
+        newStatusEffect.duration = duration;
+        newStatusEffect.remainingDuration = duration;
+        statusEffects.Add(newStatusEffect);
     }
     public void AddStun(int duration)
     {
-        StatusEffect statusEffect = ScriptableObject.CreateInstance<StatusEffect>();
-        statusEffect.name =  "Stun, (" + duration + ")";
-        statusEffect.statusEffectType = StatusEffectType.Stun;
-        statusEffect.duration = duration;
-        statusEffect.remainingDuration = duration;
-        statusEffects.Add(statusEffect);
+        foreach (StatusEffect statusEffect in statusEffects)
+        {
+            if (statusEffect.statusEffectType == StatusEffectType.Stun)
+            {
+                statusEffect.remainingDuration += duration;
+                statusEffect.name = "Stun, (" + statusEffect.remainingDuration + ")";
+                return;
+            }
+        }
+        StatusEffect newStatusEffect = ScriptableObject.CreateInstance<StatusEffect>();
+        newStatusEffect.name =  "Stun, (" + duration + ")";
+        newStatusEffect.statusEffectType = StatusEffectType.Stun;
+        newStatusEffect.duration = duration;
+        newStatusEffect.remainingDuration = duration;
+        statusEffects.Add(newStatusEffect);
     }
     public void CheckForRemoval(StatusEffect statusEffect)
     {

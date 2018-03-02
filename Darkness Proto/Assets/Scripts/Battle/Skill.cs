@@ -71,6 +71,11 @@ public class Skill : ScriptableObject {
     public float stunChance = 0f;
     public int stunDuration = 0;
 
+    [Header("Heal Properties")]
+    public bool isHealSkill = false;
+    public float minHealPercentage = 0f;
+    public float maxHealPercentage = 0f;
+
     [Header("Damage Buff Properties")]
 
     public bool isDamageBuffSkill = false;
@@ -125,20 +130,32 @@ public class Skill : ScriptableObject {
     public void UseSkillOnEnemy(Enemy enemy, PlayerStats playerStats, GameObject battleLog)
     {
         battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> uses " + name + " on " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + ">\n\n";
+        playerStats.currentResource -= resourceCost;
         float accuracyAverage = (accuracy + playerStats.accuracy.GetValue()) / 200;
         bool hasHit = Random.value < (accuracyAverage - enemy.GetComponent<EnemyStats>().dodge.GetValue());
+        if (playerStats.damageType == DamageType.Magical)
+        {
+            hasHit = true;
+        }
         if (hasHit)
         {
-            playerStats.currentResource -= resourceCost;
             if (isDamagingSkill)
             {
                 int damage = 0;
                 damage = CalculateDamage(playerStats);
-                if (playerStats.critChance.GetValue() >= Random.value)
+                if (alwaysCrits)
                 {
                     battleLog.GetComponent<Text>().text += "<b>" + playerStats.name + " crits!</b>\n\n";
                     damage = (int)(damage * playerStats.critDamage.GetValue());
+                    playerStats.battlePoints += playerStats.GetComponent<PlayerLevel>().currentLevel * 5;
                 }
+                else if (playerStats.critChance.GetValue() >= Random.value)
+                {
+                    battleLog.GetComponent<Text>().text += "<b>" + playerStats.name + " crits!</b>\n\n";
+                    damage = (int)(damage * playerStats.critDamage.GetValue());
+                    playerStats.battlePoints += playerStats.GetComponent<PlayerLevel>().currentLevel * 5;
+                }
+                playerStats.battlePoints += damage;
                 battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> deals " + damage + " damage to " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + ">\n\n";
                 enemy.GetComponent<CharacterStats>().TakeDamage(damage, playerStats.damageType, name, enemy.monsterSpecies.monsterName);
             }
@@ -146,7 +163,8 @@ public class Skill : ScriptableObject {
             {
                 if (Random.value < bleedChance)
                 {
-                    int newBleedDamage = (int)(bleedDamage *(damagePercent/100 * (Random.Range(playerStats.minDamage.GetValue(), playerStats.maxDamage.GetValue()))));
+                    int newBleedDamage = (int)(bleedDamage *(damagePercent/100 * ((playerStats.minDamage.GetValue() + playerStats.maxDamage.GetValue())/2)));
+                    playerStats.battlePoints += (newBleedDamage * bleedDuration + playerStats.GetComponent<PlayerLevel>().currentLevel) / 2;
                     battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> causes " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + "> to bleed for " + newBleedDamage + " for the next " + bleedDuration + " turns.\n\n";
                     enemy.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Bleed, newBleedDamage, bleedDuration);
                 }
@@ -155,7 +173,8 @@ public class Skill : ScriptableObject {
             {
                 if (Random.value < blightChance)
                 {
-                    int newBlightDamage = (int)(blightDamage * (damagePercent / 100 * (Random.Range(playerStats.minDamage.GetValue(), playerStats.maxDamage.GetValue()))));
+                    int newBlightDamage = (int)(blightDamage * (damagePercent / 100 * ((playerStats.minDamage.GetValue() + playerStats.maxDamage.GetValue()) / 2)));
+                    playerStats.battlePoints += (newBlightDamage * blightDuration + playerStats.GetComponent<PlayerLevel>().currentLevel) / 2;
                     battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> causes " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + "> to blight for " + newBlightDamage + " for the next " + blightDuration + " turns.\n\n";
                     enemy.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Blight, newBlightDamage, blightDuration);
                 }
@@ -164,7 +183,8 @@ public class Skill : ScriptableObject {
             {
                 if (Random.value < burnChance)
                 {
-                    int newBurnDamage = (int)(burnDamage * (damagePercent / 100 * (Random.Range(playerStats.minDamage.GetValue(), playerStats.maxDamage.GetValue()))));
+                    int newBurnDamage = (int)(burnDamage * (damagePercent / 100 * ((playerStats.minDamage.GetValue() + playerStats.maxDamage.GetValue()) / 2)));
+                    playerStats.battlePoints += (newBurnDamage * burnDuration + playerStats.GetComponent<PlayerLevel>().currentLevel) / 2;
                     battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> causes " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + "> to burn for " + newBurnDamage + " for the next " + burnDuration + " turns.\n\n";
                     enemy.GetComponent<StatusEffectHandler>().AddStatusEffect(StatusEffectType.Burn, newBurnDamage, burnDuration);
                 }
@@ -173,6 +193,7 @@ public class Skill : ScriptableObject {
             {
                 if (Random.value < stunChance)
                 {
+                    playerStats.battlePoints += playerStats.GetComponent<PlayerLevel>().currentLevel * 8;
                     battleLog.GetComponent<Text>().text += playerStats.name + " <" + playerStats.currentPosition + "> causes " + enemy.monsterSpecies.monsterName + " <" + enemy.GetComponent<EnemyStats>().currentPosition + "> to be stunned for the next " + stunDuration + " turns.\n\n";
                     enemy.GetComponent<StatusEffectHandler>().AddStun(stunDuration);
                 }
@@ -248,10 +269,15 @@ public class Skill : ScriptableObject {
     {
         if (isDamageBuffSkill)
         {
+            playerStats.battlePoints += playerStats.GetComponent<PlayerLevel>().currentLevel * 10;
             Debug.Log(allyStats.name + " gains " + damageBuffPercent + "% damage for the next " + damageBuffDuration + " turns.");
             allyStats.GetComponent<BuffHandler>().AddBuff(damageBuffDuration);
             allyStats.minDamage.AddPercentageModifier(damageBuffPercent / 100);
             allyStats.maxDamage.AddPercentageModifier(damageBuffPercent / 100);
+        }
+        if (isHealSkill)
+        {
+            allyStats.Heal(minHealPercentage, maxHealPercentage, playerStats.gameObject);
         }
     }
     public void UseSkillOnSelf(PlayerStats playerStats)
