@@ -18,7 +18,7 @@ MonoBehaviour:
   minDamage: 28
   maxDamage: 44
   damageType: 0
-  maxHealth: 25
+  maxHealth: 250
   physicalArmor: 0.2
   magicalArmor: 0.14
   dodge: 0.07
